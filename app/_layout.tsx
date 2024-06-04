@@ -10,7 +10,12 @@ import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
 import { PortalHost } from '~/components/primitives/portal';
 import { ThemeToggle } from '~/components/ThemeToggle';
-
+import {
+  BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
+import {
+  GestureHandlerRootView
+} from 'react-native-gesture-handler';
 // const LIGHT_THEME: Theme = {
 //   dark: false,
 //   colors: NAV_THEME.light,
@@ -37,6 +42,9 @@ export default function RootLayout() {
   return (
     // <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
     <>
+    <GestureHandlerRootView style={{flex: 1}}>
+
+    <BottomSheetModalProvider>
       <StatusBar style={'dark'} />
       <Stack initialRouteName='index' screenOptions={{ headerShown: false}}>
         <Stack.Screen
@@ -44,6 +52,8 @@ export default function RootLayout() {
         />
        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
+    </BottomSheetModalProvider>
+    </GestureHandlerRootView>
       {/* <PortalHost /> */}
     </>
     // </ThemeProvider>

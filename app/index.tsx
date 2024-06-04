@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard  } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { View, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, ActivityIndicator  } from 'react-native';
 import Animated, { FadeInUp, FadeOutDown, LayoutAnimationConfig } from 'react-native-reanimated';
 import { Info } from '~/lib/icons/Info';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
@@ -20,14 +20,14 @@ import { useKeyboard } from '~/lib/keyboard';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 import { Label } from '~/components/ui/label';
 import { router } from 'expo-router';
-
+import {LoginProvider} from "../modules/Login"
 const GITHUB_AVATAR_URI =
   'https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg';
   export default function Screen(){
 
-    const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    
+    const [email, setEmail] = useState('admin@gmail.com');
+    const [password, setPassword] = useState('password');
+    const [loading, setLoading] = useState(false)
 
 
     // const onChangeText = (text: string) => {
@@ -43,6 +43,18 @@ const GITHUB_AVATAR_URI =
       // if (text === 'dismiss') {
       //   dismissKeyboard();
       // }
+    }
+
+    const handleLogin = async () => {
+      const res = await LoginProvider({
+        login: email,
+        password: password,
+        setLoading,
+        router
+      })
+
+      console.log("The Response => ", res);
+      
     }
   return (
 
@@ -91,9 +103,15 @@ const GITHUB_AVATAR_URI =
               </View>
 
               <View className='mt-6'>
-                <Button onPress={() => router.push('/(tabs)')}> 
-                  <Text>Connect</Text>
-                  </Button>
+                <Button onPress={() => handleLogin()} disabled={loading}> 
+                {
+                  loading
+                  ?
+                  <ActivityIndicator size={"small"} color={"#000"}/>
+                  :
+                   <Text>Connect</Text> 
+                }
+                </Button>
               </View>
             </CardContent>
 
