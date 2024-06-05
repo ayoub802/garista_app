@@ -16,6 +16,9 @@ import {
 import {
   GestureHandlerRootView
 } from 'react-native-gesture-handler';
+import { QueryClientProvider } from '@tanstack/react-query';
+import queryClient from '../QueryClients/queryClient';
+
 // const LIGHT_THEME: Theme = {
 //   dark: false,
 //   colors: NAV_THEME.light,
@@ -41,21 +44,21 @@ export default function RootLayout() {
 
   return (
     // <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-    <>
-    <GestureHandlerRootView style={{flex: 1}}>
+        <QueryClientProvider client={queryClient}>
+          <GestureHandlerRootView style={{flex: 1}}>
 
-    <BottomSheetModalProvider>
-      <StatusBar style={'dark'} />
-      <Stack initialRouteName='index' screenOptions={{ headerShown: false}}>
-        <Stack.Screen
-          name='index'
-        />
-       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </BottomSheetModalProvider>
-    </GestureHandlerRootView>
-      {/* <PortalHost /> */}
-    </>
-    // </ThemeProvider>
+          <BottomSheetModalProvider>
+            <StatusBar style={'dark'} />
+            <Stack initialRouteName='index' screenOptions={{ headerShown: false}}>
+              <Stack.Screen
+                name='index'
+              />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+          </BottomSheetModalProvider>
+          </GestureHandlerRootView>
+      </QueryClientProvider>
   );
 }
+{/* <PortalHost /> */}
+// </ThemeProvider>

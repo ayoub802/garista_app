@@ -20,40 +20,44 @@ import { useKeyboard } from '~/lib/keyboard';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 import { Label } from '~/components/ui/label';
 import { router } from 'expo-router';
-import {LoginProvider} from "../modules/Login"
+import { LoginProvider } from '~/modules/Login';
+import { userId } from '~/Atom/atoms';
+import { useAtom } from 'jotai';
+
 const GITHUB_AVATAR_URI =
   'https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg';
   export default function Screen(){
 
-    const [email, setEmail] = useState('admin@gmail.com');
+    const [login, setLogin] = useState('admin@gmail.com');
     const [password, setPassword] = useState('password');
     const [loading, setLoading] = useState(false)
 
 
-    // const onChangeText = (text: string) => {
-    //   setValue(text);
-    // };
+    // const { isKeyboardVisible, keyboardHeight, dismissKeyboard } = useKeyboard();
 
-    const { isKeyboardVisible, keyboardHeight, dismissKeyboard } = useKeyboard();
-
-    console.log({ isKeyboardVisible, keyboardHeight });
+    // console.log({ isKeyboardVisible, keyboardHeight });
   
-    function onChangeText(text: string) {
-      console.log("text", text);
-      // if (text === 'dismiss') {
-      //   dismissKeyboard();
-      // }
-    }
+    // function onChangeText(text: string) {
+    //   console.log("text", text);
+    //   // if (text === 'dismiss') {
+    //   //   dismissKeyboard();
+    //   // }
+    // }
+    const [userID, setUderID] = useAtom(userId);
 
     const handleLogin = async () => {
       const res = await LoginProvider({
-        login: email,
-        password: password,
+        login,
+        password,
         setLoading,
         router
       })
+      
+      const {user} = res;
+      setUderID(user.id)
 
-      console.log("The Response => ", res);
+      // loginMutation.mutate({ login, password });
+      console.log("The Response => ", user.id);
       
     }
   return (
@@ -82,9 +86,9 @@ const GITHUB_AVATAR_URI =
                 <Label nativeID='email'>Email</Label>
                   <Input
                       placeholder='example@gmail.com'
-                      value={email}
+                      value={login}
                       nativeID='email'
-                      onChangeText={(text) => setEmail(text)}
+                      onChangeText={(text) => setLogin(text)}
                       aria-labelledbyledBy='inputLabel'
                       aria-errormessage='inputError'
                     />

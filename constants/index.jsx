@@ -80,3 +80,20 @@ export const OrderDetail= [
 
 
 ] 
+
+export const DATA = [
+    {
+      id: 1,
+      title: "Notification",
+    },
+    {
+      id: 2,
+      title: "Order",
+    },
+    {
+      id: 2,
+      title: "Order Complete",
+    },
+  ];
+
+export const API_URL = "https://backend.garista.com"
