@@ -8,12 +8,19 @@ export default function TabLayout() {
   return (
     <Tabs screenOptions={{ tabBarActiveTintColor: 'black', headerShown: false, tabBarStyle:{height: 55, paddingBottom: 5} }}>
       <Tabs.Screen
-        name="index"
+        name="(home)"
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <Feather name="home" size={24} color={color} />,
         }}
       />
+      {/* <Tabs.Screen
+        name="addOrder"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => <Feather name="home" size={24} color={color} />,
+        }}
+      /> */}
       <Tabs.Screen
         name="tables"
         options={{

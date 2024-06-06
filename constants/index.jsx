@@ -97,3 +97,13 @@ export const DATA = [
   ];
 
 export const API_URL = "https://backend.garista.com"
+
+export const categories = ['All', 'Category 1', 'Category 2', 'Category 3'];
+
+export const data =  [
+    { id: 1, category: 'Main course', name: 'Beef fillet', price: 18, quantity: 0, image: 'https://via.placeholder.com/80' },
+    { id: 2, category: 'Main course', name: 'Penne mediterranean', price: 16, quantity: 0, image: 'https://via.placeholder.com/80' },
+    { id: 3, category: 'Main course', name: 'Sea food mix', price: 22, quantity: 0, image: 'https://via.placeholder.com/80' },
+    { id: 4, category: 'Main course', name: 'Grilled salmon', price: 21, quantity: 0, image: 'https://via.placeholder.com/80' },
+    { id: 5, category: 'Starter', name: 'Beef fillet', price: 18, quantity: 0, image: 'https://via.placeholder.com/80' },
+  ];

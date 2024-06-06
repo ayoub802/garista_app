@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { orderAtom, restoAtom, restoId, userId } from "../Atom/atoms";
-import { OrderItems, fetchOrderDetails, fetchOrders, fetchRestoDetails } from "../modules/ApiGestion";
+import { OrderItems, fetchCategories, fetchDishes, fetchOrderDetails, fetchOrders, fetchRestoDetails } from "../modules/ApiGestion";
 import { getUser } from "~/modules/StorageGestion";
 import { useEffect, useState } from "react";
 
@@ -48,7 +48,7 @@ export const useOrderQuery = () => {
 
   const resto_id = restos?.id;
     const { data, error, isLoading, refetch } = useQuery({
-            queryKey: ['resto', resto_id],
+            queryKey: ['restoOrder', resto_id],
             queryFn: () => fetchOrders(resto_id),
             onSuccess: (data) => {
             }
@@ -57,17 +57,37 @@ export const useOrderQuery = () => {
 };
 
 export const useOrderDetailQuery = (orderId) => {
-    // const [restos, ] = useAtom(restoAtom);
-    // const [, setOrderResto] = useAtom(orderAtom);
-  
-    // const resto_id = restos?.id;
+
       const { data, error, isLoading, refetch } = useQuery({
               queryKey: ['orderDetail', orderId],
               queryFn: () => fetchOrderDetails(orderId),
-            //   onSuccess: (data) => {
-            //   }
           });    
   
           return { data, error, isLoading, refetch };
   };
-  
+
+export const useCategoriesQuery = () => {
+  const [restos, ] = useAtom(restoAtom);
+  const categorieId = restos?.id;
+
+    const { data, error, isLoading, refetch } = useQuery({
+            queryKey: ['categorieDetail', categorieId],
+            queryFn: () => fetchCategories(categorieId),
+        });    
+
+        return { data, error, isLoading, refetch };
+};
+
+export const useProductQuery = () => {
+  const [restos, ] = useAtom(restoAtom);
+  const restoId = restos?.id;
+
+    const { data, error, isLoading, refetch } = useQuery({
+            queryKey: ['productsDetail', restoId],
+            retryOnMount: false,
+            queryFn: () => fetchDishes(restoId),
+        });    
+
+        return { data, error, isLoading, refetch };
+};
+

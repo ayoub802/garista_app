@@ -27,28 +27,7 @@ const CardList = ({item}) => {
   const bottomSheetModalRef = useRef(null);
 
   const bounceValue = useRef(new Animated.Value(1)).current;
-  const leftSwipe = (progress, dragX) => {
-    const scale = dragX.interpolate({
-      inputRange: [0, 100],
-      outputRange: [0, 1],
-      extrapolate: 'clamp',
-    });
-    return (
-      <TouchableOpacity activeOpacity={0.6}>
-        <View style={{
-              backgroundColor: 'red',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: 100,
-              height: 80,
-        }}>
-          <Animated.Text style={{transform: [{scale: scale}]}}>
-            Delete
-          </Animated.Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+
 
   useEffect(() => {
     if (item.status === "New") {
@@ -80,7 +59,6 @@ const CardList = ({item}) => {
   const formattedDate = dayjs(item.created_at).format('DD MMM YYYY');
   const formattedTime = dayjs(item.created_at).format('hh:mm A');
   return (
-    <Swipeable renderRightActions={leftSwipe}>
       <View className='max-w-[90%] self-center w-full' style={{marginBottom: 8}}>
           <TouchableOpacity onPress={handlePresentModalPress} className='w-full border rounded-2xl flex flex-row justify-between items-center' style={{
             borderColor: "#4b556325",
@@ -115,7 +93,7 @@ const CardList = ({item}) => {
                   <Text className=' text-right text-md font-medium' style={{color: "rgb(34, 197, 94)",}}>New</Text>
                 </View>
                 <View>
-                    <Text className='text-black text-center text-md'>{item.total}.00 MAD</Text>
+                    <Text className='text-black text-center text-md'>{item.total} MAD</Text>
                 </View>
               </View>
           </TouchableOpacity>
@@ -127,7 +105,6 @@ const CardList = ({item}) => {
                   </Button>
                 </View> */}
       </View>
-    </Swipeable>
   )
 }
 

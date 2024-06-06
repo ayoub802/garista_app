@@ -4,6 +4,17 @@ import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 
 export default function Tab() {
+
+  const tables = [
+    { id: 14, occupied: false },
+    { id: 15, occupied: false },
+    { id: 16, occupied: false },
+    { id: 17, occupied: true },
+    { id: 18, occupied: true },
+    { id: 21, occupied: false },
+    { id: 24, occupied: true },
+    { id: 26, occupied: false },
+  ];
     const renderTable = (number: number, selected: any) => (
         <TouchableOpacity className='relative'>
             <View className='w-36 h-16 border-[3px] border-white rounded-xl items-center justify-center bg-[#212121] relative z-10'>
@@ -17,104 +28,40 @@ export default function Tab() {
       );  
 
   return (
-    <SafeAreaView style={styles.container}>
-{/* 
-    <ScrollView contentContainerStyle={styles.tableContainer}>
-      <View style={styles.row}>
-        {renderTable(1, false)}
-        {renderTable(2, false)}
-        {renderTable(3, false)}
+    <View style={styles.container}>
+      <View style={styles.tabs}>
+        <TouchableOpacity style={styles.tab}>
+          <Text>Main hall</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tab}>
+          <Text>Terrace</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tab}>
+          <Text>Backyard</Text>
+        </TouchableOpacity>
       </View>
-      <View style={styles.row}>
-        {renderTable(4, false)}
-        {renderTable(5, false)}
-        {renderTable(6, true)}
+      <View style={styles.tableContainer}>
+        {tables.map((table) => (
+          <TouchableOpacity
+            key={table.id}
+            style={[styles.table, table.occupied ? styles.occupied : styles.available]}
+            // onPress={() => navigation.navigate('ManageOrder', { tableId: table.id })}
+            disabled={table.occupied}
+          >
+            <Text style={styles.tableText}>{table.id}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
-      <View style={styles.row}>
-        {renderTable(7, false)}
-        {renderTable(8, false)}
-        {renderTable(9, false)}
-      </View>
-      <View style={styles.row}>
-        {renderTable(10, false)}
-        {renderTable(11, false)}
-        {renderTable(12, false)}
-      </View>
-      <View style={styles.row}>
-        {renderTable(13, false)}
-        {renderTable(14, false)}
-      </View>
-    </ScrollView> */}
-
-
-  </SafeAreaView>
+    </View>
   );
 }
-
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 16,
-     justifyContent: "center",
-     alignItems: "center"
-    },
-    blurContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-
-    overflow: 'hidden',
-    borderRadius: 20,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    overly: {
-     backgroundColor: 'rgba(0,0,0,0.5)'
-    },
-    headerText: {
-      color: 'white',
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-    tableContainer: {
-      flexGrow: 1,
-      justifyContent: 'center',
-    },
-    row: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      marginBottom: 16,
-    },
-    table: {
-      width: 95,
-      height: 60,
-      backgroundColor: '#444',
-      opacity: 0.5,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 10,
-      position: "relative"
-    },
-    selectedTable: {
-      backgroundColor: '#D32F2F',
-    },
-    tableText: {
-      color: 'white',
-      fontSize: 18,
-    },
-    nextButton: {
-      backgroundColor: '#333',
-      padding: 16,
-      alignItems: 'center',
-      borderRadius: 8,
-      marginVertical: 16,
-    },
-    nextButtonText: {
-      color: 'white',
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
-  });
+  container: { flex: 1, padding: 20 },
+  tabs: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 20 },
+  tab: { padding: 10, backgroundColor: '#ccc', borderRadius: 5 },
+  tableContainer: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' },
+  table: { width: 50, height: 50, justifyContent: 'center', alignItems: 'center', margin: 10, borderRadius: 5 },
+  available: { backgroundColor: '#0f0' },
+  occupied: { backgroundColor: '#f00' },
+  tableText: { color: '#fff' }
+});

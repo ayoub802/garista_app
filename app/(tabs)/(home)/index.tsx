@@ -21,11 +21,12 @@ import { Skeleton } from '~/components/ui/skeleton';
 import { Ionicons } from '@expo/vector-icons';
 import NotificationsList from '../../components/NotificationsList';
 import {ScrollView} from "react-native-gesture-handler"
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
 import { orderAtom, restoAtom, userId } from '~/Atom/atoms';
 import { useOrderQuery, useRestoQuery } from '~/useFetch/useFetch';
 import dayjs from "dayjs";
+import { router } from 'expo-router';
 
 export default function Tab() {
 
@@ -66,6 +67,9 @@ export default function Tab() {
       </View>
     )
   }
+
+
+
   return (
     <SafeAreaView style={{flex: 1,backgroundColor: "#fff"}}>
         <StatusBar style='dark'  backgroundColor={'#000'} hidden/>
@@ -74,7 +78,7 @@ export default function Tab() {
         }}>
           <View className='max-w-[90%] justify-center self-center items-center '>
             <View className='flex flex-row justify-between items-center w-full '>
-            <TouchableOpacity  className='bg-[#000]/55 w-12 h-12 justify-center items-center rounded-lg border  m-0' style={{borderColor: "#4b5563" }}>
+            <TouchableOpacity onPress={() => router.push('/addOrder')} className='bg-[#000]/55 w-12 h-12 justify-center items-center rounded-lg border  m-0' style={{borderColor: "#4b5563" }}>
               <AntDesign name="plus" size={18} color="white" className='m-0'/>
             </TouchableOpacity>
             <Text className='text-center text-lg' style={{color: "#fff" }}>{restos?.name}</Text>
@@ -132,13 +136,22 @@ export default function Tab() {
             </View>
           </View>
           <View style={{ flex: 1, width: '100%' }}>
-            <FlashList 
-              data={filteredData}
-              estimatedItemSize={100}
-              renderItem={({item}) => <CardList item={item}/>}
-            />
+            {
+              filteredData?.length > 0
+              ?
+              <FlashList 
+                data={filteredData}
+                estimatedItemSize={100}
+                renderItem={({item}) => <CardList item={item}/>}
+              />
+              :
+
+              <View>
+                <Text className='text-black text-center font-medium' style={{fontSize: 19}}>No Orders Today</Text>
+              </View>
+            }
           </View>
-    
+
         </ScrollView>
         {/* <View>
           <NotificationsList />

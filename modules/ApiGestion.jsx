@@ -60,13 +60,51 @@ export const fetchOrderDetails = async (orderId) => {
   };
 
 
-//  export const OrderItems = ({orderId}) => {
-//     const [items, setItems] = useState(null);
-//     useEffect(() => {
-//       fetchOrderDetails(orderId).then(data => {
-//         setItems(data.dishes); // Assuming the API returns an object with a dishes array
-//       });
-//     }, [orderId]);
-//     return items;
-//   }
+  export const fetchCategories = async (categorieId) => {
+    try {
+      const response = await axiosInstance.get(`/categories/${categorieId}`);
+    //   console.log("The Item order => ", response.data);
+      return response.data; // Assuming this returns the full order details including items
+    } catch (error) {
+      console.error("Failed to fetch order details:", error.message);
+      return null; // Return null or appropriate error handling
+    }
+  };
+
+ export const fetchDishes = async (restoId) => {
+    // if (!restoId) return;
+    // setLoading(true);
+    try {
+      // Fetch visible categories first
+      const categoryResponse = await axiosInstance.get(`/categories/${restoId}`);
+      const categoriesData = await categoryResponse.data;
+      const visibleCategories = categoriesData.filter(cat => cat.visibility === 1);
+      const visibleCategoryIds = visibleCategories.map(cat => cat.id);
   
+      // Fetch dishes and drinks
+      const [dishesResponse, drinksResponse] = await Promise.all([
+        axiosInstance.get(`/getdishes/${restoId}`),
+        axiosInstance.get(`/getdrinks/${restoId}`)
+      ]);
+  
+      const dishesData = await dishesResponse.data;
+      const drinksData = await drinksResponse.data;
+  
+      // Filter dishes and drinks based on visible categories
+      const filteredDishes = dishesData.filter(dish => visibleCategoryIds.includes(dish.category_id));
+      const filteredDrinks = drinksData.filter(drink => visibleCategoryIds.includes(drink.category_id));
+  
+      // Combine and set the filtered data
+      let combinedData = [];
+      if (filteredDishes.length) {
+        combinedData.push(...filteredDishes.map(item => ({ ...item, type: 'dish' })));
+      }
+      if (filteredDrinks.length) {
+        combinedData.push(...filteredDrinks.map(item => ({ ...item, type: 'drink' })));
+      }
+  
+     return combinedData;
+    } catch (error) {
+      console.error('Error fetching dishes and drinks:', error);
+    } 
+  };
