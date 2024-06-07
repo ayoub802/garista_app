@@ -11,15 +11,34 @@ import TabsFilter from '~/components/TabFilter/TabFilter';
 import React, {useEffect, useState} from 'react';
 import { data } from '~/constants';
 import  ProductItem  from '~/components/Product/ProductItem';
+import  ShoppingBagScreen  from '~/components/ShoppingCart';
 import { useProductQuery } from '~/useFetch/useFetch';
 import { FlashList } from '@shopify/flash-list';
+import { getCart } from '~/modules/StorageGestion';
+import { cartAtom } from '~/Atom/atoms';
+import { useAtom } from 'jotai';
 
-
+type Category = string;
+type CartOrder = any[]; 
 export default function AddOrder() {
 
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [quantity, setQuantity] = useState(1);
+  const [cartOrder, setCartOrder] = useAtom<CartOrder>(cartAtom);
 
+  useEffect(() => {
+    const fetchValues = async () => {
+      try{
+            const res = await getCart();
+            // setCartOrder(res)
+      }
+      catch(err)
+      {
+        console.log("The Error => ",err);
+        
+      }
+    }
+  }, [])
   const increment = (id: number) => {
     // setProducts(products.map(product => product.id === id ? { ...product, quantity: product.quantity + 1 } : product));
   };
@@ -52,8 +71,11 @@ export default function AddOrder() {
             <Text className='text-center text-lg' style={{color: "#fff" }}>Add Order</Text>
             {/* <View>
             </View> */}
-              <TouchableOpacity  className='bg-black/55 w-12 h-12 justify-center items-center rounded-lg border  m-0'  style={{borderColor: "#4b5563" }}>
+              <TouchableOpacity onPress={() => router.push('/cartScreen')} className='bg-black/55 relative w-12 h-12 justify-center items-center rounded-lg border  m-0'  style={{borderColor: "#4b5563" }}>
               <Feather name="shopping-cart" size={15} color="#fff" />
+              <View>
+                <Text>{cartOrder.length}</Text>
+              </View>
             </TouchableOpacity>
             </View>
           </View>
@@ -70,6 +92,8 @@ export default function AddOrder() {
                 keyExtractor={item => item.id.toString()}
                 renderItem={({ item }) => <ProductItem item={item} increment={increment} decrement={decrement} quantity={quantity}/>}
               />
+
+
               {/* <View>
                 <Text className='text-black'>Hello</Text>
               </View> */}

@@ -16,10 +16,10 @@ import { Text } from '~/components/ui/text';
 import { Octicons } from '@expo/vector-icons';
 import CardList from '~/components/CardList';
 import { FlashList } from "@shopify/flash-list";
-import {OrderDetail, dataList, DATA} from "../../constants/index"
+import {OrderDetail, dataList, DATA} from "../../../constants/index"
 import { Skeleton } from '~/components/ui/skeleton';
 import { Ionicons } from '@expo/vector-icons';
-import NotificationsList from '../../components/NotificationsList';
+import NotificationsList from '../../../components/NotificationsList';
 import {ScrollView} from "react-native-gesture-handler"
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
@@ -27,6 +27,7 @@ import { orderAtom, restoAtom, userId } from '~/Atom/atoms';
 import { useOrderQuery, useRestoQuery } from '~/useFetch/useFetch';
 import dayjs from "dayjs";
 import { router } from 'expo-router';
+import Toast from 'react-native-toast-message';
 
 export default function Tab() {
 
@@ -90,7 +91,6 @@ export default function Tab() {
             </View>
           </View>
         </View>
-
         <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false} nestedScrollEnabled={true}>
           <View className='justify-center self-center items-center mt-2 bg-white'>
             {/* <TouchableOpacity onPress={handlePresentModalPress}>

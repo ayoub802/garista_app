@@ -1,10 +1,27 @@
 import { View,  Image, TouchableOpacity, StyleSheet } from 'react-native';
-import React from 'react'
+import React, { useRef } from 'react'
 import { Button } from '../ui/button';
 import { Text } from '../ui/text';
 import { AntDesign } from '@expo/vector-icons';
 import { API_URL } from '~/constants';
+import { saveCart } from '~/modules/StorageGestion';
+
 const ProductItem = ({ item, increment, decrement, quantity }) => {
+
+  const addToCart = async (product) =>{
+    let obj = [
+      {
+        products: product,
+        quantity: quantity
+      }
+    ]
+
+    let cartProducts = [];
+    cartProducts.push(obj)
+
+    saveCart(cartProducts);
+    return console.log("Success");
+  }
   return (
     <View style={styles.itemContainer}>
     <Image source={{ uri:  `${API_URL}/storage/${item.image}` }} style={styles.image} />
@@ -36,7 +53,7 @@ const ProductItem = ({ item, increment, decrement, quantity }) => {
         </TouchableOpacity>
       </View>
     </View>
-    <Button variant={"outline"} style={{borderRadius: 8}}>
+    <Button variant={"outline"} style={{borderRadius: 8}} onPress={() => addToCart(item)}>
       <Text style={{color: "#fff"}}>Add to cart</Text>
     </Button>
   </View>

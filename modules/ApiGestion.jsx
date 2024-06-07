@@ -83,12 +83,26 @@ export const fetchOrderDetails = async (orderId) => {
   
       // Fetch dishes and drinks
       const [dishesResponse, drinksResponse] = await Promise.all([
-        axiosInstance.get(`/getdishes/${restoId}`),
-        axiosInstance.get(`/getdrinks/${restoId}`)
+        axiosInstance.get(`/getdishes/${restoId}`).catch(error => {
+          console.error('Error fetching dishes:', error.message);
+          return { data: [], status: 404 };
+        }),
+        axiosInstance.get(`/getdrinks/${restoId}`).catch(error => {
+          console.error('Error fetching drinks:', error.message);
+          return { data: [], status: 404 };
+        })
       ]);
+      
+      if (dishesResponse.status === 404) {
+        console.error('Dishes resource is empty');
+      }
+      
+      if (drinksResponse.status === 404) {
+        console.error('Drinks resource is empty');
+      }
   
-      const dishesData = await dishesResponse.data;
-      const drinksData = await drinksResponse.data;
+      const dishesData = dishesResponse.data;
+      const drinksData = drinksResponse.data;
   
       // Filter dishes and drinks based on visible categories
       const filteredDishes = dishesData.filter(dish => visibleCategoryIds.includes(dish.category_id));
@@ -102,9 +116,10 @@ export const fetchOrderDetails = async (orderId) => {
       if (filteredDrinks.length) {
         combinedData.push(...filteredDrinks.map(item => ({ ...item, type: 'drink' })));
       }
+
   
      return combinedData;
     } catch (error) {
-      console.error('Error fetching dishes and drinks:', error);
+      console.error('Error fetching dishes and drinks:', error.message);
     } 
   };

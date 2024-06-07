@@ -4,6 +4,7 @@ import { orderAtom, restoAtom, restoId, userId } from "../Atom/atoms";
 import { OrderItems, fetchCategories, fetchDishes, fetchOrderDetails, fetchOrders, fetchRestoDetails } from "../modules/ApiGestion";
 import { getUser } from "~/modules/StorageGestion";
 import { useEffect, useState } from "react";
+import queryClient from "~/QueryClients/queryClient";
 
 
 export const GetUserValue = async () => {
@@ -78,14 +79,19 @@ export const useCategoriesQuery = () => {
         return { data, error, isLoading, refetch };
 };
 
+
 export const useProductQuery = () => {
   const [restos, ] = useAtom(restoAtom);
   const restoId = restos?.id;
+  // useWebSocket(restoId, queryClient);
 
     const { data, error, isLoading, refetch } = useQuery({
             queryKey: ['productsDetail', restoId],
             retryOnMount: false,
             queryFn: () => fetchDishes(restoId),
+            // refetchInterval: 1000,
+            refetchOnWindowFocus: true,
+            retry: 3
         });    
 
         return { data, error, isLoading, refetch };

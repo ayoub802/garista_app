@@ -29,3 +29,30 @@ export const getUser = async () => {
     }
 }
 
+export const saveCart = async (cartProducts) => {
+    try{
+      const res = AsyncStorage.setItem('cart', JSON.stringify(cartProducts));
+
+        return res;
+    }
+    catch(err)
+    {
+        console.log("The error => ", err);
+    }
+}
+
+export const getCart = async () => {
+    try{
+         const res = await AsyncStorage.getItem(
+            'cart'
+          );
+
+        return res;
+    }
+    catch(err)
+    {
+        console.log("The error => ", err);
+    }
+}
+
+
