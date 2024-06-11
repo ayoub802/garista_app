@@ -23,14 +23,13 @@ type CartOrder = any[];
 export default function AddOrder() {
 
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [quantity, setQuantity] = useState(1);
   const [cartOrder, setCartOrder] = useAtom<CartOrder>(cartAtom);
 
   useEffect(() => {
     const fetchValues = async () => {
       try{
             const res = await getCart();
-            // setCartOrder(res)
+            setCartOrder(res)
       }
       catch(err)
       {
@@ -38,24 +37,15 @@ export default function AddOrder() {
         
       }
     }
-  }, [])
-  const increment = (id: number) => {
-    // setProducts(products.map(product => product.id === id ? { ...product, quantity: product.quantity + 1 } : product));
-  };
 
-  const decrement = (id: number) => {
-    // setProducts(products.map(product => product.id === id && product.quantity > 0 ? { ...product, quantity: product.quantity - 1 } : product));
-  };
+    fetchValues()
+  }, [cartOrder])
+
+
+
+
   const products = useProductQuery()
-  console.log("The Filtered of Products => ", selectedCategory);
   const filteredData = selectedCategory != "All" ? products.data?.filter(item => item.categorie.name === selectedCategory) : products.data;
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     products.refetch();
-  //   }, 500); // Polling every 5 seconds
-
-  //   return () => clearInterval(interval);
-  // }, [products.refetch]);
    
   return (
     <SafeAreaView style={{flex: 1,backgroundColor: "#fff"}}>
@@ -71,10 +61,10 @@ export default function AddOrder() {
             <Text className='text-center text-lg' style={{color: "#fff" }}>Add Order</Text>
             {/* <View>
             </View> */}
-              <TouchableOpacity onPress={() => router.push('/cartScreen')} className='bg-black/55 relative w-12 h-12 justify-center items-center rounded-lg border  m-0'  style={{borderColor: "#4b5563" }}>
+              <TouchableOpacity onPress={() => router.push('/cartScreen')} className='bg-black/55 relative w-12 h-12 justify-center items-center rounded-lg border m-0'  style={{borderColor: "#4b5563" }}>
               <Feather name="shopping-cart" size={15} color="#fff" />
-              <View>
-                <Text>{cartOrder.length}</Text>
+              <View className='w-5 h-5 rounded-full justify-center items-center absolute -top-2 -left-1' style={{backgroundColor: "red"}}>
+                <Text className='text-[12px]' style={{fontSize: 10}}>{cartOrder?.length}</Text>
               </View>
             </TouchableOpacity>
             </View>
@@ -90,7 +80,7 @@ export default function AddOrder() {
                 data={filteredData}
                 estimatedItemSize={200}
                 keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => <ProductItem item={item} increment={increment} decrement={decrement} quantity={quantity}/>}
+                renderItem={({ item }) => <ProductItem item={item}/>}
               />
 
 

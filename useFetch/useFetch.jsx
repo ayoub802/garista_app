@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { orderAtom, restoAtom, restoId, userId } from "../Atom/atoms";
-import { OrderItems, fetchCategories, fetchDishes, fetchOrderDetails, fetchOrders, fetchRestoDetails } from "../modules/ApiGestion";
+import { OrderItems, fetchCategories, fetchDishes, fetchOrderDetails, fetchOrders, fetchRestoDetails, fetchTables } from "../modules/ApiGestion";
 import { getUser } from "~/modules/StorageGestion";
 import { useEffect, useState } from "react";
 import queryClient from "~/QueryClients/queryClient";
@@ -51,10 +51,18 @@ export const useOrderQuery = () => {
     const { data, error, isLoading, refetch } = useQuery({
             queryKey: ['restoOrder', resto_id],
             queryFn: () => fetchOrders(resto_id),
-            onSuccess: (data) => {
-            }
-        });    
-  return { data , error, isLoading, refetch  };
+            enabled: !!resto_id, // Ensure the query runs only if resto_id is available
+            staleTime: Infinity, // Data is never considered stale
+            cacheTime: Infinity, // Cache data indefinitely
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+        });  
+        
+         // Filter orders to only include those from the current day
+  const currentDate = new Date().toISOString().split('T')[0];
+  const todayOrders = data?.filter(order => order.created_at.startsWith(currentDate));
+
+  return { data , error, isLoading, refetch, data: todayOrders  };
 };
 
 export const useOrderDetailQuery = (orderId) => {
@@ -62,6 +70,11 @@ export const useOrderDetailQuery = (orderId) => {
       const { data, error, isLoading, refetch } = useQuery({
               queryKey: ['orderDetail', orderId],
               queryFn: () => fetchOrderDetails(orderId),
+              enabled: !!orderId,
+              staleTime: Infinity, // Data is never considered stale
+              cacheTime: Infinity, // Cache data indefinitely
+              refetchOnWindowFocus: false,
+              refetchOnReconnect: false,
           });    
   
           return { data, error, isLoading, refetch };
@@ -92,6 +105,21 @@ export const useProductQuery = () => {
             // refetchInterval: 1000,
             refetchOnWindowFocus: true,
             retry: 3
+        });    
+
+        return { data, error, isLoading, refetch };
+};
+
+export const useTablesQuery = () => {
+  const [restos, ] = useAtom(restoAtom);
+  const restoId = restos?.id;
+  // useWebSocket(restoId, queryClient);
+
+    const { data, error, isLoading, refetch } = useQuery({
+            queryKey: ['tablesDetail', restoId],
+            retryOnMount: false,
+            queryFn: () => fetchTables(restoId),
+            // refetchInterval: 1000,
         });    
 
         return { data, error, isLoading, refetch };

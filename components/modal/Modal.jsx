@@ -26,7 +26,6 @@ const ModalBot = ({
   const orderId = item?.id;
   const { data, error, isLoading } = useOrderDetailQuery(orderId);
 
-  console.log("The Order Detail => ", data);
   let Dishes = [];
   Dishes = data?.dishes
   return (

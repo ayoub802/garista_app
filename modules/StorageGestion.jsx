@@ -31,9 +31,7 @@ export const getUser = async () => {
 
 export const saveCart = async (cartProducts) => {
     try{
-      const res = AsyncStorage.setItem('cart', JSON.stringify(cartProducts));
-
-        return res;
+      await AsyncStorage.setItem('cart', JSON.stringify(cartProducts));
     }
     catch(err)
     {
@@ -43,11 +41,8 @@ export const saveCart = async (cartProducts) => {
 
 export const getCart = async () => {
     try{
-         const res = await AsyncStorage.getItem(
-            'cart'
-          );
-
-        return res;
+        const cart = await AsyncStorage.getItem('cart');
+        return cart ? JSON.parse(cart) : [];
     }
     catch(err)
     {
@@ -55,4 +50,14 @@ export const getCart = async () => {
     }
 }
 
+export const removeCart = async () => {
+    try{
+        const cart = await AsyncStorage.removeItem('cart');
+        return "remove success";
+    }
+    catch(err)
+    {
+        console.log("The error => ", err);
+    }
+}
 

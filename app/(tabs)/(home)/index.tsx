@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { View,  StyleSheet, TouchableOpacity, FlatList, Dimensions, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getUser } from '~/modules/StorageGestion';
+import { getUser, removeCart } from '~/modules/StorageGestion';
 import { Button } from '~/components/ui/button';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import {
@@ -54,7 +54,7 @@ export default function Tab() {
     useEffect(() => {
       const interval = setInterval(() => {
         result.refetch();
-      }, 500); // Polling every 5 seconds
+      }, 500);
 
       return () => clearInterval(interval);
     }, [result.refetch]);

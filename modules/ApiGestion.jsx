@@ -84,21 +84,21 @@ export const fetchOrderDetails = async (orderId) => {
       // Fetch dishes and drinks
       const [dishesResponse, drinksResponse] = await Promise.all([
         axiosInstance.get(`/getdishes/${restoId}`).catch(error => {
-          console.error('Error fetching dishes:', error.message);
+          console.log('Error fetching dishes:', error.message);
           return { data: [], status: 404 };
         }),
         axiosInstance.get(`/getdrinks/${restoId}`).catch(error => {
-          console.error('Error fetching drinks:', error.message);
+          console.log('Error fetching drinks:', error.message);
           return { data: [], status: 404 };
         })
       ]);
       
       if (dishesResponse.status === 404) {
-        console.error('Dishes resource is empty');
+        console.log('Dishes resource is empty');
       }
       
       if (drinksResponse.status === 404) {
-        console.error('Drinks resource is empty');
+        console.log('Drinks resource is empty');
       }
   
       const dishesData = dishesResponse.data;
@@ -122,4 +122,20 @@ export const fetchOrderDetails = async (orderId) => {
     } catch (error) {
       console.error('Error fetching dishes and drinks:', error.message);
     } 
+  };
+
+  export const fetchTables = async (restoId) => {
+    // const [resto, setResto] = useAtom(restoId);
+    try {
+      const response = await axiosInstance.get(`/tables/${restoId}`);
+      if(response)
+      {
+        console.log("The Fetched Tables => ", response.data);
+      }
+      const data = response.data
+      return data;
+    } catch (error) {
+      console.error("Error fetching tables :", error.message);
+      throw error;
+    }
   };

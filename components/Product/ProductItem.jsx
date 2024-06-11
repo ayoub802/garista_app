@@ -1,27 +1,52 @@
 import { View,  Image, TouchableOpacity, StyleSheet } from 'react-native';
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { Button } from '../ui/button';
 import { Text } from '../ui/text';
 import { AntDesign } from '@expo/vector-icons';
 import { API_URL } from '~/constants';
-import { saveCart } from '~/modules/StorageGestion';
+import { getCart, saveCart } from '~/modules/StorageGestion';
 
-const ProductItem = ({ item, increment, decrement, quantity }) => {
+const ProductItem = ({ item, }) => {
 
-  const addToCart = async (product) =>{
-    let obj = [
-      {
-        products: product,
-        quantity: quantity
+  const [quantity, setQuantity] = useState(1);
+
+  const addToCart = async (product) => {
+    try {
+      let cartProducts = await getCart(); // Retrieve existing cart
+      if (!cartProducts) cartProducts = []; // Initialize if cart is empty
+  
+      const productIndex = cartProducts.findIndex(item => item?.product?.id === product.id);
+  
+      if (productIndex > -1) {
+        // If product already exists, update its quantity
+        cartProducts[productIndex].quantity += quantity;
+      } else {
+        // If product does not exist, add new product with quantity
+        cartProducts.push({
+          product: product,
+          quantity: quantity,
+        });
       }
-    ]
-
-    let cartProducts = [];
-    cartProducts.push(obj)
-
-    saveCart(cartProducts);
-    return console.log("Success");
+  
+      await saveCart(cartProducts);  // Save the updated cart
+      console.log("Success:", cartProducts);
+    } catch (error) {
+      console.error("Error adding to cart", error);
+    }
   }
+
+  const increment = async () => {
+    const newQuantity = quantity + 1;
+    setQuantity(newQuantity);
+  };
+
+  const decrement = async () => {
+    if (quantity > 1) {
+      const newQuantity = quantity - 1;
+      setQuantity(newQuantity);
+    }
+  };
+
   return (
     <View style={styles.itemContainer}>
     <Image source={{ uri:  `${API_URL}/storage/${item.image}` }} style={styles.image} />
@@ -36,7 +61,7 @@ const ProductItem = ({ item, increment, decrement, quantity }) => {
                 borderRadius: 8,
                 justifyContent: "center",
                 alignItems: "center",
-        }} onPress={() => decrement(item.id)}>
+        }} onPress={() => decrement()}>
         <AntDesign name="minus" size={15} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.counter}>{quantity}</Text>
@@ -47,7 +72,7 @@ const ProductItem = ({ item, increment, decrement, quantity }) => {
                 borderRadius: 8,
                 justifyContent: "center",
                 alignItems: "center",
-        }} onPress={() => increment(item.id)}>
+        }} onPress={() => increment()}>
           {/* <Text>+</Text> */}
           <AntDesign name="plus" size={15} color="#fff" />
         </TouchableOpacity>
