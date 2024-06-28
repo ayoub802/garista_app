@@ -2,6 +2,9 @@ import { useAtom } from 'jotai';
 import { useState } from 'react';
 import { restoAtom, restoId } from '~/Atom/atoms';
 import axiosInstance from '~/axiosInstance';
+import { database } from '~/firebaseConfig';
+import { ref, onValue, query, orderByChild, equalTo } from 'firebase/database';
+
 export const API_URL = 'https://backend.garista.com/api'; // Replace with your actual API URL
 
 export const fetchNotifications = async () => {
@@ -32,10 +35,10 @@ export const fetchRestoDetails = async (user_id) => {
     }
   };
 
-export const fetchOrders = async (resto_id) => {
+export const fetchOrders = async (resto_id, page = 1, limit = 10) => {
     // const [resto, setResto] = useAtom(restoAtom);
     try {
-      const response = await axiosInstance.get(`/order_resto/${resto_id}`);
+      const response = await axiosInstance.get(`/order_resto/${resto_id}?page=${page}&limit=${limit}`);
     //   if(response)
     //   {
     //     console.log("The Fetched Order => ", response.data);
@@ -47,6 +50,41 @@ export const fetchOrders = async (resto_id) => {
       throw error;
     }
   };
+
+export const fetchInfos = async (restoId) => {
+  // const [resto, setResto] = useAtom(restoAtom);
+  try {
+    const response = await axiosInstance.get(`/infos/${restoId}`);
+    if(response)
+    {
+      console.log("The Fetched Infos => ", response.data);
+    }
+    const data = response.data
+    return data[0];
+  } catch (error) {
+    console.error("Error Info details: ", error.message);
+    throw error;
+  }
+};
+
+export const fetchDataFromFirebase = async (restoId) => {
+  const ordersRef = ref(database, 'orders');
+  const restoOrdersQuery = query(ordersRef, orderByChild('resto_id'), equalTo(restoId));
+
+  const ordersList = [];
+  onValue(restoOrdersQuery, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      for (let id in data) {
+        ordersList.push({ id, ...data[id] });
+      }
+    }
+    // Here you can use ordersList as needed, for example, set it to state if using React
+    console.log(ordersList);
+  });
+
+  return ordersList;
+};
 
 export const fetchOrderDetails = async (orderId) => {
     try {

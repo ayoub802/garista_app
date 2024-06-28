@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { View, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, ActivityIndicator  } from 'react-native';
 import Animated, { FadeInUp, FadeOutDown, LayoutAnimationConfig } from 'react-native-reanimated';
 import { Info } from '~/lib/icons/Info';
@@ -23,34 +23,96 @@ import { router } from 'expo-router';
 import { LoginProvider } from '~/modules/Login';
 import { userId } from '~/Atom/atoms';
 import { useAtom } from 'jotai';
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 const GITHUB_AVATAR_URI =
   'https://i.pinimg.com/originals/ef/a2/8d/efa28d18a04e7fa40ed49eeb0ab660db.jpg';
   export default function Screen(){
 
-    const [login, setLogin] = useState('admin@gmail.com');
+    const [login, setLogin] = useState('anas@gmail.com');
     const [password, setPassword] = useState('password');
     const [loading, setLoading] = useState(false)
 
 
-    // const { isKeyboardVisible, keyboardHeight, dismissKeyboard } = useKeyboard();
-
-    // console.log({ isKeyboardVisible, keyboardHeight });
+ const [expoPushToken, setExpoPushToken] = useState("");
+  const [channels, setChannels] = useState<Notifications.NotificationChannel[]>(
+    []
+  );
+  const [notification, setNotification] = useState<
+    Notifications.Notification | undefined
+  >(undefined);
+  // const [pusherData, setPusherData] = useState<any>(null);
+  const notificationListener = useRef<Notifications.Subscription>();
+  const responseListener = useRef<Notifications.Subscription>();
   
-    // function onChangeText(text: string) {
-    //   console.log("text", text);
-    //   // if (text === 'dismiss') {
-    //   //   dismissKeyboard();
-    //   // }
-    // }
+  React.useEffect(() => {
+    async function getPermissions() {
+      const { status } = await Notifications.requestPermissionsAsync({
+        ios: {
+          allowAlert: true,
+          allowSound: true,
+        },
+      });
+      if (status === 'granted') {
+        registerForPushNotificationsAsync();
+      } else {
+        alert('Failed to get push token for push notification!');
+      }
+    }
+  
+    getPermissions();
+    registerForPushNotificationsAsync().then(
+      (token) => {token && setExpoPushToken(token); console.log("The Token => ", token);}
+      
+    );
+
+    if (Platform.OS === "android") {
+      Notifications.getNotificationChannelsAsync().then((value) =>
+        setChannels(value ?? [])
+      );
+    }
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log("The REsponse =>",response);
+      });
+
+    return () => {
+      notificationListener.current &&
+        Notifications.removeNotificationSubscription(
+          notificationListener.current
+        );
+    };
+
+
+  }, []);
     const [userID, setUderID] = useAtom(userId);
 
+    console.log("The Token of All => ", expoPushToken);
+    
+
     const handleLogin = async () => {
+
+    
       const res = await LoginProvider({
         login,
         password,
         setLoading,
-        router
+        router,
+        expoPushToken
       })
       
       const {user} = res;
@@ -128,3 +190,44 @@ const GITHUB_AVATAR_URI =
 )
 }
 
+async function schedulePushNotification(title: string, body: string) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: title,
+      body: body,
+      data: { data: "goes here" },
+      sound: "app_voice.wav",
+    },
+    trigger: {},
+  });
+}
+async function registerForPushNotificationsAsync() {
+  let token;
+  if (Device.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        // alert("Failed to get push token for push notification!");
+        return;
+      }
+    }
+
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log("Expo Push Token:", token);
+
+    // Set up notification channels for Android
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "Default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        sound: "app_voice.wav",  // Ensure the sound file is correctly named and placed.
+      });
+    }
+  } else {
+    alert("Must use physical device for Push Notifications");
+  }
+
+  return token;
+}

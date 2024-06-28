@@ -58,6 +58,8 @@ const CardList = ({item}) => {
   }, []);
   const formattedDate = dayjs(item.created_at).format('DD MMM YYYY');
   const formattedTime = dayjs(item.created_at).format('hh:mm A');
+
+  const TotaleProducts = item.total
   return (
       <View className='max-w-[90%] self-center w-full' style={{marginBottom: 8}}>
           <TouchableOpacity onPress={handlePresentModalPress} className='w-full border rounded-2xl flex flex-row justify-between items-center' style={{
@@ -93,7 +95,7 @@ const CardList = ({item}) => {
                   <Text className=' text-right text-md font-medium' style={{color: "rgb(34, 197, 94)",}}>New</Text>
                 </View>
                 <View>
-                    <Text className='text-black text-center text-md'>{item.total} MAD</Text>
+                    <Text className='text-black text-center text-md'>{TotaleProducts.toFixed(2)} MAD</Text>
                 </View>
               </View>
           </TouchableOpacity>

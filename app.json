@@ -16,9 +16,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.garistawaiter"
     },
     "android": {
+      "package": "com.garistawaiter",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -38,21 +40,26 @@
             "./assets/sounds/app_voice.wav"
           ]
         }
-      ]
-      
+      ],
+      "expo-build-properties"
     ],
-
     "experiments": {
       "typedRoutes": true
     },
-  "extra": {
+    "extra": {
       "router": {
         "origin": false
       },
-    "eas": {
-      "projectId": "18169b21-e411-434a-87ee-6f7602199f61"
+      "eas": {
+        "projectId": "18169b21-e411-434a-87ee-6f7602199f61"
+      }
+    },
+    "owner": "ayoub802",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/18169b21-e411-434a-87ee-6f7602199f61"
     }
-  },
-    "owner": "ayoub802"
   }
 }

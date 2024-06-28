@@ -24,11 +24,12 @@ import {ScrollView} from "react-native-gesture-handler"
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
 import { orderAtom, restoAtom, userId } from '~/Atom/atoms';
-import { useOrderQuery, useRestoQuery } from '~/useFetch/useFetch';
+import { useOrderFirebaseQuery, useOrderQuery, useRestoQuery } from '~/useFetch/useFetch';
 import dayjs from "dayjs";
 import { router } from 'expo-router';
 import Toast from 'react-native-toast-message';
-
+import { database } from '~/firebaseConfig';
+import { ref, onValue, query, orderByChild, equalTo } from 'firebase/database';
 export default function Tab() {
 
   const screenWidth = Dimensions.get('window').width;
@@ -36,31 +37,56 @@ export default function Tab() {
   const gap = 5;
   const availableSpace = screenWidth - (numColumns + 7) * gap;
   const itemSize = availableSpace / numColumns;
+
   const { isLoading } = useRestoQuery();
+  const [dataOrder, setDataOrder] = useState<any>([]);
+  const [loadingOrder, setLoadingOrder] = useState(false)
   const [restos, setRestos] = useAtom<any>(restoAtom);
   const [orderResto, setOrderResto] = useAtom(orderAtom);
-   const result = useOrderQuery();
+  const restoId = restos?.id
+   const { data: result, error,  refetch } = useOrderQuery();
+   const { data: fireOrder, isLoading: isQueryLoading,} = useOrderFirebaseQuery();
+
    const today = dayjs().startOf('day');
   //  result?.data.map((item: any) => {
-     const filteredData = result?.data?.filter((order:any) => {
-      const isSameDay = dayjs(order.created_at).isSame(today, 'day')
+
+
+
+    useEffect(() => {
+      // Fetch data from Firebase
+      const fetchDataFromFirebase = async () => {
+        setLoadingOrder(true)
+        const ordersRef = ref(database, 'orders');
+        // const restoOrdersQuery = query(ordersRef, orderByChild('resto_id'), equalTo(restoId));
+        // console.log("The query From Firebase => ", restoOrdersQuery);
+
+        onValue(ordersRef, (snapshot) => {
+          const data = snapshot.val();
+          console.log("The Data From Firebase => ", data);
+          const claimsList = [];
+
+          for (let id in data) {
+            
+            claimsList.push({ id, ...data[id] });
+          }
+          claimsList.sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf());
+
+          setDataOrder(claimsList);
+        });
+        setLoadingOrder(false)
+      };
+  
+      fetchDataFromFirebase();
+    }, []);
+
+    const filteredData = dataOrder?.filter((order:any) => {
+      let isSameDay = dayjs(order.created_at).isSame(today, 'day');
+      isSameDay = order?.resto_id == restoId;
 
       return isSameDay;
-      // console.log("The Date => ", order, dayjs(order.created_at).isSame(today, 'day'));
     });
-    console.log("The data => ", filteredData);
-    
-    
-    useEffect(() => {
-      const interval = setInterval(() => {
-        result.refetch();
-      }, 500);
 
-      return () => clearInterval(interval);
-    }, [result.refetch]);
-  //  })
-  // setOrderResto(filteredData);
-  if(isLoading && result.isLoading )
+  if(isLoading && loadingOrder)
   {
     return(
       <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
@@ -146,7 +172,7 @@ export default function Tab() {
               />
               :
 
-              <View>
+              <View style={{flex: 1, justifyContent: "center", alignItems:"center"}}>
                 <Text className='text-black text-center font-medium' style={{fontSize: 19}}>No Orders Today</Text>
               </View>
             }

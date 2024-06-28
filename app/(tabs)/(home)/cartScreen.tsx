@@ -1,57 +1,156 @@
   import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
-  import React, { useEffect, useState } from 'react'
+  import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
   import { FlashList } from '@shopify/flash-list';
   import Feather from '@expo/vector-icons/Feather';
   import { router } from 'expo-router';
   import { getCart, saveCart } from '~/modules/StorageGestion';
   import { API_URL } from '~/constants';
 import  SkeletonLoader  from '~/components/SkeletonLoader';
+import axiosInstance from '~/axiosInstance';
+import { restoAtom } from '~/Atom/atoms';
+import { useAtom } from 'jotai';
+import ModalTable from "~/components/modal/ModalTable"
+import { useInfosQuery } from '~/useFetch/useFetch';
 
     
     const CartScreen = () => {
       const [products, setProducts] = useState<any>([])
       const [loading, setLoading] = useState(false)
-      useEffect(() => {
-        const fetchValues = async () => {
-          setLoading(true)
-          try{
-            const res = await getCart();
-            setProducts(res)
-          }
-          catch(err)
-          {
-            console.log("The Error => ",err);
-            
-          }
-          finally
-          {
-            setLoading(false)
-          }
+      const [tables, setTables] = useState<any[]>([]);
+      const [disableCheck, setDisableCheck] = useState(true)
+      const [restos, ] = useAtom(restoAtom);
+      const restoId = restos?.id
+      const { data, error, isLoading: isQueryLoading, refetch } = useInfosQuery(restoId);
+
+
+    const fetchTables = async () => {
+      try {
+        const response = await axiosInstance.get(`/tables/${restos?.id}`);
+        const data = response.data;
+        setTables(data);
+      } catch (err) {
+        console.log("Error fetching tables: ", err);
+      }
+    };
+    
+    useEffect(() => {
+      const fetchValues = async () => {
+        setLoading(true)
+        try{
+          const res = await getCart();
+          setProducts(res)
+          setDisableCheck(res.length === 0); // Update disableCheck based on cart contents
         }
+        catch(err)
+        {
+          console.log("The Error => ",err);
+          
+        }
+        finally
+        {
+          setLoading(false)
+        }
+      }
+      fetchTables()
+      fetchValues()
+    }, [])
+
+
+    const updateCart = async (updatedProducts: any) => {
+      setProducts(updatedProducts);
+      await saveCart(updatedProducts);
+      setDisableCheck(updatedProducts.length === 0); // Update disableCheck based on cart contents
+    };
+    const removeItem = async ({id}: any) => {
+      const updatedProducts = products.filter((item: any) => item.product.id !== id);
+      updateCart(updatedProducts);
+
+    };
+
+    const increment = async ({id}: any) => {
+      const updatedProducts = products.map((item: any) => item?.product?.id === id ? { ...item, quantity: item.quantity + 1 } : item);
+      updateCart(updatedProducts);
+
+    };
+
+    const decrement = async ({id}: any) => {
+      const updatedProducts = products.map((item: any) => 
+        item.product.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
+      );
+      updateCart(updatedProducts);
+
+    };
+    const totalPrice = products.reduce((sum:any, item: any) => sum + item?.product?.price * item?.quantity, 0);
+    
+    // if(totalPrice != 0)
+    // {
+    //   setDisableCheck(true)
+    // }
+    console.log("The Tables => ",products);
+    const SUbmitOrder = async ({tabel_id}: any) => {
+      try{
+        let cartItemProduct = products.map((item: any) => ({
+          type: item.product.type,  // Assuming all items are dishes
+          id: item.product.id,
+          quantity: item.quantity
+        }));
+
         
-        fetchValues()
-      }, [])
-
-      const removeItem = async ({id}: any) => {
-        const updatedProducts = products.filter((item: any) => item.product.id !== id);
-        setProducts(updatedProducts);
-        await saveCart(updatedProducts);
+      const order = {
+        total: totalPrice,
+        status: 'New',
+        table_id: tabel_id,  // Assuming static for now, you may need to adjust this based on your app's logic
+        resto_id: restoId,   // Assuming static as well, adjust accordingly
+        cartItems: cartItemProduct
       };
+      console.log("The order is ",order);
 
-      const increment = async ({id}: any) => {
-        const updatedProducts = products.map((item: any) => item?.product?.id === id ? { ...item, quantity: item.quantity + 1 } : item);
-        setProducts(updatedProducts);
-        await saveCart(updatedProducts);
-      };
+      const response = await fetch(`https://backend.garista.com/api/order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(order)
+      });
 
-      const decrement = async ({id}: any) => {
-        const updatedProducts = products.map((item: any) => 
-          item.product.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
-        );
-        setProducts(updatedProducts);
-        await saveCart(updatedProducts);
-      };
-      const totalPrice = products.reduce((sum:any, item: any) => sum + item?.product?.price * item?.quantity, 0);
+      if (!response.ok) {
+        const errorResponse = await response.text();
+        throw new Error(`HTTP error ${response.status}: ${errorResponse}`);
+      }
+
+      const responseData = await response.json();
+      console.log('Order submitted:', order, cartItemProduct, responseData);
+      if(response)
+      {
+        const notification = {
+          title: "New Order",
+          status: "Order",
+          resto_id: restoId,
+          table_id: tabel_id,
+        };
+        const formData = new FormData();
+        formData.append("title", "New Order");
+        formData.append("status", "Order");
+        formData.append("resto_id", restoId);
+        const responseNotification = await fetch(`https://backend.garista.com/api/notifications`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+        },
+          body: JSON.stringify(notification)
+        });
+        }
+
+        saveCart([])
+        setProducts([])
+        bottomSheetModalRef.current?.close()
+      }
+      catch(err)
+      {
+        console.log("The Error => ", err);
+        
+      }
+    }
         
   const renderItem = ({ item }: any) => (
     <View style={styles.itemContainer}>
@@ -69,7 +168,7 @@ import  SkeletonLoader  from '~/components/SkeletonLoader';
         </View>
       </View>
       <View className='flex justify-end items-end gap-1'>
-        <Text style={styles.itemPrice}>${item?.product?.price}</Text>
+        <Text style={styles.itemPrice}>{item?.product?.price} {data?.currency}</Text>
         <TouchableOpacity style={styles.deleteButton} onPress={() => removeItem({id: item?.product?.id})}>
           <Feather name="trash-2" size={18} color="#f26060" />
         </TouchableOpacity>
@@ -77,10 +176,19 @@ import  SkeletonLoader  from '~/components/SkeletonLoader';
     </View>
   );
 
+  const snapPoints = useMemo(() => ['25%', '70%'], []);
+  const bottomSheetModalRef = useRef(null);
 
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleSheetChanges = useCallback((index: any) => {
+  }, []);
   const clearCart = async () => {
     setProducts([]);
     await saveCart([]);
+    setDisableCheck(true); // Disable checkout button when cart is cleared
   };
     return (
       <View style={styles.container}>
@@ -129,15 +237,17 @@ import  SkeletonLoader  from '~/components/SkeletonLoader';
             }
             </>
           }
-          <View style={styles.footer}>
-              <View className='flex items-center gap-1 flex-row'>
-                  <Text style={styles.totalText}>Total :</Text>
-                  <Text style={styles.totalPrice}>{totalPrice.toFixed(2)}$</Text>
-              </View>
-              <TouchableOpacity style={styles.checkoutButton}>
-              <Text style={styles.checkoutButtonText}>CHECK OUT</Text>
-              </TouchableOpacity>
-          </View>
+            <View style={styles.footer}>
+                <View className='flex items-center gap-1 flex-row'>
+                    <Text style={styles.totalText}>Total :</Text>
+                    <Text style={styles.totalPrice}>{totalPrice.toFixed(2)} {data?.currency}</Text>
+                </View>
+                <TouchableOpacity onPress={handlePresentModalPress} disabled={disableCheck} style={[styles.checkoutButton, {backgroundColor: !disableCheck ? "#000" : "#888" }]}>
+                <Text style={styles.checkoutButtonText}>CHECK OUT</Text>
+                </TouchableOpacity>
+            </View>
+
+            <ModalTable bottomSheetModalRef={bottomSheetModalRef} SUbmitOrder={SUbmitOrder} handleSheetChanges={handleSheetChanges} snapPoints={snapPoints} tables={tables}/>
           </View>
     )
   }
@@ -237,7 +347,7 @@ import  SkeletonLoader  from '~/components/SkeletonLoader';
           color: '#333',
       },
       checkoutButton: {
-          backgroundColor: '#000',
+          // backgroundColor: '#000',
           paddingVertical: 10,
           paddingHorizontal: 20,
           borderRadius: 5,

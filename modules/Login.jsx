@@ -10,7 +10,8 @@ export const LoginProvider = async ({
   login, 
   password,
   setLoading,
-  router
+  router,
+  expoPushToken
 }) => {
   
   setLoading(true)
@@ -19,19 +20,58 @@ export const LoginProvider = async ({
       login: login,
       password: password
     })
+    console.log("Updating Expo Token: ", expoPushToken);
+
         if(res)
         {
-            setLoading(false)
-            const {user} = res.data
-            saveUser(JSON.stringify(user.id))
-            router.push('/(tabs)')
+            const {role, user} = res.data
+
+            if(role == "staff")
+            {
+              saveUser(JSON.stringify(user.user_id))
+              const id = JSON.stringify(user.id)
+              UpdateExpoPushToken(id, expoPushToken)
+              router.push('/(tabs)')
+            }
+            // else{
+            //   saveUser(JSON.stringify(user.id))
+            //   // const id = JSON.stringify(user.id)
+            //   // UpdateExpoPushToken(id, expoPushToken)
+            //   router.push('/(tabs)')
+            // }
+
+            console.log("The User => ", JSON.stringify(user.user_id));
         }
         return res.data;
    }
    catch(err)
    {
     console.log("The Error => ", err.message);
-   }    
+   }   
+   finally{
+    setLoading(false)
+   } 
+}
+
+
+export const UpdateExpoPushToken = async (id, expoPushToken) => {
+  try{
+    const formData = new FormData();
+    formData.append('expoPushToken', expoPushToken);  
+    console.log("Updating Expo Token for ID: ", id, " Token of All: ", formData);
+
+    const res = await axiosInstance.put('/staffs/' + id, {
+      expoPushToken: expoPushToken
+    });
+
+     if(res)
+     {
+      console.log("Update Successfully => ", res.data);
+     }
+  }
+  catch(err){
+    console.log("The Error of Update => ", err);
+  };
 }
 
 // export const useLoginAndFetchResto = () => {

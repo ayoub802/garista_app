@@ -10,11 +10,23 @@ import { StatusBar } from 'expo-status-bar';
 export default function Tab() {
   const { data: tables} = useTablesQuery()
   const { data: orders } = useOrderQuery();
-  const hasOrderForToday = (tableId: any) => {
-    return orders?.some((order: any) => order.table_id === tableId);
-  };
-  const TableRectangle = ({item}: any) => {
 
+  const currentDate = new Date().toISOString().split('T')[0];
+  const todayOrders = orders?.filter((order: any) => order.created_at.startsWith(currentDate));
+
+  const hasOrderForToday = (tableId: any) => {
+    return todayOrders?.some((order: any) => order.table_id === tableId);
+  };
+
+  // const hasOrderForToday = (tableId: any) => {
+  //   return orders?.some((order: any) => order.table_id === tableId);
+  // };
+
+  console.log("The Orders => ", todayOrders);
+  
+  const TableRectangle = ({item}: any) => {
+    
+    console.log("is Has Order => ", hasOrderForToday(item.id));
     const backgroundColor = hasOrderForToday(item.id) ? "#212121" : "#d9d9d9";
     return (
       <TouchableOpacity className='relative z-10 ' style={{marginBottom: 50, marginTop: 25}}>
