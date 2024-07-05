@@ -4,6 +4,7 @@ export const notificationsAtom = atom([]);
 export const restoAtom = atom([]);
 export const orderAtom = atom([]);
 export const userId = atom(null);
+export const staffs = atom(null);
 export const restoId = atom(null);
 export const cartAtom = atom([]);
 export const cartTotalAtom = atom((get) => {

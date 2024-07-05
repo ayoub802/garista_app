@@ -29,6 +29,35 @@ export const getUser = async () => {
     }
 }
 
+export const saveStaff = async (userId) => {
+    try{
+         const res = await AsyncStorage.setItem(
+            'staffs',
+            userId,
+          );
+
+        return res;
+    }
+    catch(err)
+    {
+        console.log("The error => ", err);
+    }
+}
+
+export const getStaff = async () => {
+    try{
+         const res = await AsyncStorage.getItem(
+            'staffs'
+          );
+
+        return res;
+    }
+    catch(err)
+    {
+        console.log("The error => ", err);
+    }
+}
+
 export const saveCart = async (cartProducts) => {
     try{
       await AsyncStorage.setItem('cart', JSON.stringify(cartProducts));

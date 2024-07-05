@@ -12,10 +12,10 @@ import React, {useEffect, useState} from 'react';
 import { data } from '~/constants';
 import  ProductItem  from '~/components/Product/ProductItem';
 import  ShoppingBagScreen  from '~/components/ShoppingCart';
-import { useProductQuery } from '~/useFetch/useFetch';
+import { useInfosQuery, useProductQuery } from '~/useFetch/useFetch';
 import { FlashList } from '@shopify/flash-list';
 import { getCart } from '~/modules/StorageGestion';
-import { cartAtom } from '~/Atom/atoms';
+import { cartAtom, restoAtom } from '~/Atom/atoms';
 import { useAtom } from 'jotai';
 
 type Category = string;
@@ -24,7 +24,8 @@ export default function AddOrder() {
 
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cartOrder, setCartOrder] = useAtom<CartOrder>(cartAtom);
-
+  const [restos, ] = useAtom(restoAtom);
+  const restoId = restos?.id
   useEffect(() => {
     const fetchValues = async () => {
       try{
@@ -43,6 +44,7 @@ export default function AddOrder() {
 
 
 
+  const { data, error, isLoading: isQueryLoading, refetch } = useInfosQuery(restoId);
 
   const products = useProductQuery()
   const filteredData = selectedCategory != "All" ? products.data?.filter(item => item.categorie.name === selectedCategory) : products.data;
@@ -55,7 +57,7 @@ export default function AddOrder() {
         }}>
           <View className='max-w-[90%] justify-center self-center items-center '>
             <View className='flex flex-row justify-between items-center w-full '>
-            <TouchableOpacity onPress={() => router.back()} className='bg-[#000]/55 w-12 h-12 justify-center items-center rounded-lg border  m-0' style={{borderColor: "#4b5563" }}>
+            <TouchableOpacity onPress={() => router.back()} className='bg-black/55 relative w-12 h-12 justify-center items-center rounded-lg border m-0' style={{borderColor: "#4b5563" }}>
             <Feather name="arrow-left" size={18} color="#fff" />
             </TouchableOpacity>
             <Text className='text-center text-lg' style={{color: "#fff" }}>Add Order</Text>
@@ -80,7 +82,7 @@ export default function AddOrder() {
                 data={filteredData}
                 estimatedItemSize={200}
                 keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => <ProductItem item={item}/>}
+                renderItem={({ item }) => <ProductItem item={item} data={data}/>}
               />
 
 

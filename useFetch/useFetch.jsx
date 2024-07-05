@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { orderAtom, restoAtom, restoId, userId } from "../Atom/atoms";
-import { OrderItems, fetchCategories, fetchDataFromFirebase, fetchDishes, fetchInfos, fetchOrderDetails, fetchOrders, fetchRestoDetails, fetchTables } from "../modules/ApiGestion";
-import { getUser } from "~/modules/StorageGestion";
+import { orderAtom, restoAtom, restoId, staffs, userId } from "../Atom/atoms";
+import { OrderItems, fetchCategories, fetchDataFromFirebase, fetchDishes, fetchInfos, fetchNotifications, fetchOrderDetails, fetchOrders, fetchRestoDetails, fetchStaff, fetchTables, fetchUser } from "../modules/ApiGestion";
+import { getStaff, getUser } from "~/modules/StorageGestion";
 import { useEffect, useState } from "react";
 import queryClient from "~/QueryClients/queryClient";
 
@@ -28,6 +28,27 @@ export const useGetUserValue = () => {
 
   return userID;
 };
+
+export const useGetStaffValue = () => {
+  const [staffID, setStaffID] = useAtom(staffs);
+
+  useEffect(() => {
+      const fetchUserId = async () => {
+          try {
+            setStaffID(null);  // Clear previous userId before updating
+              const resId = await getStaff();
+              const parsedId = JSON.parse(resId);
+              setStaffID(parsedId.id);
+          } catch (error) {
+              console.error("Error fetching user ID: ", error);
+          }
+      };
+
+      fetchUserId();
+  }, [setStaffID]);
+
+  return staffID;
+};
 export const useRestoQuery = () => {
     // const [userID, setUderID] = useAtom(userId);
     const [restos, setRestos] = useAtom(restoAtom);
@@ -45,6 +66,39 @@ export const useRestoQuery = () => {
     setRestos(resto);
 
     return {  isLoading, error };
+};
+
+
+export const useUserQuery = () => {
+  // const [userID, setUderID] = useAtom(userId);
+  const userID = useGetUserValue();
+
+  console.log("The user Id of resto => ", userID);
+
+  const userId = userID
+  const { data, isLoading, error, refetch } = useQuery({
+      queryKey: ['userQuey', userId],
+      queryFn: () => fetchUser(userId),
+    });
+
+  return { data, isLoading, error };
+};
+
+
+export const useStaffsQuery = () => {
+  // const [userID, setUderID] = useAtom(userId);
+  const userID = useGetStaffValue();
+
+
+  console.log("The user Id of staffs => ", userID);
+
+  const userId = userID
+  const { data, isLoading, error, refetch } = useQuery({
+      queryKey: ['staffsQuerys', userId],
+      queryFn: () => fetchStaff(userId),
+    });
+
+  return { data, isLoading, error, refetch };
 };
 
 export const useOrderQuery = () => {
@@ -157,11 +211,28 @@ export const useInfosQuery = (restoId) => {
   // const restoId = restos?.id;
   // useWebSocket(restoId, queryClient);
 
-  console.log("The Use Info => ", restoId);
+  // console.log("The Use Info => ", restoId);
     const { data, error, isLoading, refetch } = useQuery({
             queryKey: ['infoTable', restoId],
             retryOnMount: false,
             queryFn: () => fetchInfos(restoId),
+            // refetchInterval: 1000,
+        });    
+
+        return { data, error, isLoading, refetch };
+};
+
+
+export const useNotificationQuery = (restoId) => {
+  // const [restos, ] = useAtom(restoAtom);
+  // const restoId = restos?.id;
+  // useWebSocket(restoId, queryClient);
+
+  // console.log("The Use Info => ", restoId);
+    const { data, error, isLoading, refetch } = useQuery({
+            queryKey: ['notifiTable', restoId],
+            retryOnMount: false,
+            queryFn: () => fetchNotifications(restoId),
             // refetchInterval: 1000,
         });    
 

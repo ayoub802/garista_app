@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import { View, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, ActivityIndicator  } from 'react-native';
+import { View, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, ActivityIndicator, TouchableOpacity  } from 'react-native';
 import Animated, { FadeInUp, FadeOutDown, LayoutAnimationConfig } from 'react-native-reanimated';
 import { Info } from '~/lib/icons/Info';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
@@ -26,6 +26,7 @@ import { useAtom } from 'jotai';
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
+import * as Sentry from "@sentry/react-native";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -66,6 +67,7 @@ const GITHUB_AVATAR_URI =
         registerForPushNotificationsAsync();
       } else {
         alert('Failed to get push token for push notification!');
+        Sentry.captureException(new Error('Failed to get push token for push notification!'))
       }
     }
   
@@ -205,17 +207,27 @@ async function registerForPushNotificationsAsync() {
   let token;
   if (Device.isDevice) {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
     if (existingStatus !== 'granted') {
       const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
-        // alert("Failed to get push token for push notification!");
-        return;
-      }
+      finalStatus = status;
     }
+    if (finalStatus !== 'granted') {
+      Sentry.captureException(new Error('Failed to get push token for push notification!'));
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+    const projectId =
+    Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
 
-    token = (await Notifications.getExpoPushTokenAsync()).data;
+    if (!projectId) {
+      Sentry.captureException(new Error('Project ID not found'))
+    }
+    token = (await Notifications.getExpoPushTokenAsync({
+      projectId,
+    })).data;
     console.log("Expo Push Token:", token);
-
+    Sentry.captureException(new Error(`The Token is ${token}`))
     // Set up notification channels for Android
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync("default", {

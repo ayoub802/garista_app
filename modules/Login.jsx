@@ -4,7 +4,7 @@ import { useRestoQuery } from "../useFetch/useFetch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { restoAtom, userId } from "~/Atom/atoms";
 import { useAtom } from "jotai";
-import { saveUser } from "./StorageGestion";
+import { saveStaff, saveUser } from "./StorageGestion";
 
 export const LoginProvider = async ({
   login, 
@@ -25,10 +25,10 @@ export const LoginProvider = async ({
         if(res)
         {
             const {role, user} = res.data
-
-            if(role == "staff")
+            if(role == "staff" && user.role.name == "Waiter")
             {
               saveUser(JSON.stringify(user.user_id))
+              saveStaff(JSON.stringify(user))
               const id = JSON.stringify(user.id)
               UpdateExpoPushToken(id, expoPushToken)
               router.push('/(tabs)')

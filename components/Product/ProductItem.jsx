@@ -1,15 +1,16 @@
-import { View,  Image, TouchableOpacity, StyleSheet } from 'react-native';
-import React, { useRef, useState } from 'react'
+import { View,  Image, TouchableOpacity, StyleSheet,  } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react'
 import { Button } from '../ui/button';
 import { Text } from '../ui/text';
 import { AntDesign } from '@expo/vector-icons';
 import { API_URL } from '~/constants';
 import { getCart, saveCart } from '~/modules/StorageGestion';
 
-const ProductItem = ({ item, }) => {
+const ProductItem = ({ item,data }) => {
 
   const [quantity, setQuantity] = useState(1);
 
+  const [isAdded, setIsAdded] = useState(false)
   const addToCart = async (product) => {
     try {
       let cartProducts = await getCart(); // Retrieve existing cart
@@ -27,9 +28,14 @@ const ProductItem = ({ item, }) => {
           quantity: quantity,
         });
       }
+      setIsAdded(true);
+      setTimeout(() => {
+        setIsAdded(false)
+      }, 1000)
   
-      await saveCart(cartProducts);  // Save the updated cart
-      console.log("Success:", cartProducts);
+      // await saveCart(cartProducts);  // Save the updated cart
+      // console.log("Success:", cartProducts);
+
     } catch (error) {
       console.error("Error adding to cart", error);
     }
@@ -48,38 +54,40 @@ const ProductItem = ({ item, }) => {
   };
 
   return (
-    <View style={styles.itemContainer}>
+    <View style={styles.itemContainer }>
     <Image source={{ uri:  `${API_URL}/storage/${item.image}` }} style={styles.image} />
     <View style={styles.infoContainer}>
       <Text style={styles.name}>{item?.name}</Text>
-      <Text style={styles.price}>{item?.price} €</Text>
+      <Text style={styles.price}>{item?.price} {data?.currency}</Text>
       <View style={styles.counterContainer}>
         <TouchableOpacity style={{
-                backgroundColor: "#000",
-                height: 25,
-                width: 25,
-                borderRadius: 8,
-                justifyContent: "center",
-                alignItems: "center",
+      width: 30,
+      height: 30,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 4,
         }} onPress={() => decrement()}>
-        <AntDesign name="minus" size={15} color="#fff" />
+        <AntDesign name="minus" size={15} color="#333" />
         </TouchableOpacity>
         <Text style={styles.counter}>{quantity}</Text>
         <TouchableOpacity style={{
-                backgroundColor: "#000",
-                height: 25,
-                width: 25,
-                borderRadius: 8,
-                justifyContent: "center",
-                alignItems: "center",
-        }} onPress={() => increment()}>
+        width: 30,
+        height: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 4,
+          }} onPress={() => increment()}>
           {/* <Text>+</Text> */}
-          <AntDesign name="plus" size={15} color="#fff" />
+          <AntDesign name="plus" size={15} color="#333" />
         </TouchableOpacity>
       </View>
     </View>
-    <Button variant={"outline"} style={{borderRadius: 8}} onPress={() => addToCart(item)}>
-      <Text style={{color: "#fff"}}>Add to cart</Text>
+    <Button variant={"outline"} style={{borderRadius: 8, backgroundColor:isAdded ? "#fff" : "#000"}} onPress={() => addToCart(item)}>
+      <Text style={{color: isAdded ?  "#000" : "#fff"}}>{isAdded ? "Added ..." : "Add to cart"}</Text>
     </Button>
   </View>
   )

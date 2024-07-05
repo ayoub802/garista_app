@@ -12,19 +12,26 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "notification": {
+      "icon": "./assets/images/icon.png",
+      "iosDisplayInForeground": true
+     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.garistawaiter"
+      "bundleIdentifier": "com.garistawaiter",
+      "googleServicesFile" : "./android/app/google-services.json"
     },
     "android": {
+      "permissions": ["NOTIFICATIONS"],
       "package": "com.garistawaiter",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "googleServicesFile" : "./android/app/google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -36,12 +43,15 @@
       [
         "expo-notifications",
         {
+          "icon": "./assets/images/icon.png",
+          "color": "#fff",
           "sounds": [
             "./assets/sounds/app_voice.wav"
           ]
         }
       ],
-      "expo-build-properties"
+        "expo-build-properties"
+
     ],
     "experiments": {
       "typedRoutes": true
@@ -55,9 +65,7 @@
       }
     },
     "owner": "ayoub802",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/18169b21-e411-434a-87ee-6f7602199f61"
     }

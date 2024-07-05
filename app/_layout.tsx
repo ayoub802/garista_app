@@ -8,7 +8,7 @@ import * as React from 'react';
 import { Platform, View, Text } from 'react-native';
 import { NAV_THEME } from '~/lib/constants';
 import { useColorScheme } from '~/lib/useColorScheme';
-import { PortalHost } from '~/components/primitives/portal';
+import { PortalHost } from '@rn-primitives/portal';
 import { ThemeToggle } from '~/components/ThemeToggle';
 import {
   BottomSheetModalProvider,
@@ -19,7 +19,10 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import queryClient from '../QueryClients/queryClient';
 import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
+import * as Sentry from "@sentry/react-native";
+
 // import { toastConfig } from '~/constants';
+
 
 // const LIGHT_THEME: Theme = {
 //   dark: false,
@@ -89,6 +92,17 @@ export default function RootLayout() {
   //   return null;
   // }
 
+  Sentry.init({
+    dsn: "https://28563eeda9494e385a5909f84a2f1588@o4507538209112064.ingest.de.sentry.io/4507538211864656",
+    // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+    // We recommend adjusting this value in production.
+    tracesSampleRate: 1.0,
+    _experiments: {
+      // profilesSampleRate is relative to tracesSampleRate.
+      // Here, we'll capture profiles for 100% of transactions.
+      profilesSampleRate: 1.0,
+    },
+  });
   return (
     // <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
         <QueryClientProvider client={queryClient}>
@@ -102,6 +116,8 @@ export default function RootLayout() {
               />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
+
+            <PortalHost />
           </BottomSheetModalProvider>
           </GestureHandlerRootView>
       </QueryClientProvider>

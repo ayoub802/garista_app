@@ -12,12 +12,15 @@ import dayjs from 'dayjs';
 import { database } from '../../firebaseConfig';
 import { ref, onValue } from 'firebase/database';
 import axios from 'axios';
+import { useAtom } from 'jotai';
+import { restoAtom } from '~/Atom/atoms';
 export default function Tab() {
   const [page, setPage] = useState(1);
   const [data, setData] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
-
+  const [restos, setRestos] = useAtom<any>(restoAtom);
+  const restoId = restos?.id
   const { data: result, error, isLoading: isQueryLoading, refetch } = useOrderQuery();
   const today = dayjs().startOf('day');
   //  result?.data.map((item: any) => {
@@ -92,12 +95,11 @@ export default function Tab() {
   
 
   const filteredData = data?.filter((order:any) => {
-    const isSameDay = dayjs(order.created_at).isSame(today, 'day')
+    let isSameDay = order?.resto_id == restoId && dayjs(order.created_at).isSame(today, 'day');
 
     return isSameDay;
     // console.log("The Date => ", order, dayjs(order.created_at).isSame(today, 'day'));
   });
-  console.log("The Data => ", data);
 
   return (
     <SafeAreaView style={{flex: 1,backgroundColor: "#fff"}}>

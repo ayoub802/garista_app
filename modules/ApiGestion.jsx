@@ -7,17 +7,17 @@ import { ref, onValue, query, orderByChild, equalTo } from 'firebase/database';
 
 export const API_URL = 'https://backend.garista.com/api'; // Replace with your actual API URL
 
-export const fetchNotifications = async () => {
-    try{
-        const response = await axiosInstance.get(`/notifications`);
-        // console.log("Notification Results => ", response.data);
-        return response.data;
-    }
-    catch(err)
-    {
-        console.log("The Error => ", err);
-    }
-};
+// export const fetchNotifications = async () => {
+//     try{
+//         const response = await axiosInstance.get(`/notifications`);
+//         // console.log("Notification Results => ", response.data);
+//         return response.data;
+//     }
+//     catch(err)
+//     {
+//         console.log("The Error => ", err);
+//     }
+// };
 
 export const fetchRestoDetails = async (user_id) => {
     // const [resto, setResto] = useAtom(restoId);
@@ -95,7 +95,7 @@ export const fetchOrderDetails = async (orderId) => {
       console.error("Failed to fetch order details:", error.message);
       return null; // Return null or appropriate error handling
     }
-  };
+};
 
 
   export const fetchCategories = async (categorieId) => {
@@ -177,3 +177,39 @@ export const fetchOrderDetails = async (orderId) => {
       throw error;
     }
   };
+
+ export const fetchNotifications = async (restoId) => {
+    try {
+        const response = await axiosInstance.get('/getNotifications/'+restoId);
+        const data = response.data;
+        // setNotificationData(data);
+        // setNotification(data);
+        return data;
+    } catch (error) {
+        console.error('Failed to fetch notifications', error);
+    }
+};
+
+export const fetchUser = async (userId) => {
+  try {
+      const response = await axiosInstance.get('/users/'+userId);
+      const data = response.data;
+      // setNotificationData(data);
+      // setNotification(data);
+      return data?.users[0];
+  } catch (error) {
+      console.error('Failed to fetch notifications', error);
+  }
+};
+
+export const fetchStaff = async (userId) => {
+  try {
+      const response = await axiosInstance.get('/staffs/'+userId);
+      const data = response.data;
+      // setNotificationData(data);
+      // setNotification(data);
+      return data;
+  } catch (error) {
+      console.error('Failed to fetch notifications', error);
+  }
+};
